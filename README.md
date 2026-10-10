@@ -1,130 +1,191 @@
 # PhoneDock
 
-**Turn your Windows PC into an Android control station.**
+### Your Android phone. Your Windows desktop. One control station.
 
-PhoneDock is an experimental Windows desktop application built with Electron, React, and TypeScript. It lets you connect an Android phone to your PC, mirror its screen, interact using your mouse and keyboard, and access useful device controls.
+PhoneDock is an experimental Windows desktop application designed to bring Android device mirroring and essential phone controls directly to your PC. Built with **Electron, React, and TypeScript**, it combines screen mirroring, mouse and keyboard interaction, device information, connection management, and quick controls in one desktop workspace.
+
+The goal is simple: make interacting with your Android phone from your Windows PC more convenient.
+
+> **Project status:** Experimental and under active development. Device compatibility, configuration options, and features may vary.
+
+---
 
 ## Features
 
-- **Live screen mirroring** — View your Android device inside the desktop app.
-- **Mouse and keyboard control** — Interact with your phone from your PC.
-- **Device information** — View available device details, battery, storage, RAM, and network information.
-- **Quick controls** — Access Home, Back, Recent Apps, volume, mute, and lock actions.
-- **USB and Wi-Fi ADB** — Connect through USB or wireless ADB.
-- **Connection management** — Detect devices, refresh connections, and reconnect when needed.
-- **Screenshots** — Capture your phone screen.
-- **Mirror settings** — Configure supported mirroring options.
-- **AI-assisted actions** — Experimental convenience features; availability depends on configuration.
+- **Live Screen Mirroring** — View your Android phone inside the PhoneDock workspace.
+- **Mouse Interaction** — Click, tap, and interact with supported phone interfaces from your PC.
+- **Keyboard Input** — Type into supported text fields using your computer keyboard.
+- **Device Dashboard** — View available device information, including battery, storage, RAM, Android version, and network details.
+- **Quick Navigation** — Use Home, Back, and Recent Apps controls.
+- **Device Controls** — Access volume up, volume down, mute, and lock actions.
+- **USB Connectivity** — Connect your phone through Android Debug Bridge (ADB).
+- **Wireless ADB** — Connect over Wi-Fi when wireless debugging is configured and supported.
+- **Connection Management** — Detect devices, refresh connections, disconnect, and reconnect.
+- **Screenshots** — Capture screenshots of your phone screen.
+- **Mirror Settings** — Configure supported mirroring options.
+- **Experimental AI Assistance** — Optional AI-related convenience features, depending on configuration.
 
 ## Tech Stack
 
-- React
-- TypeScript
-- Electron
-- Vite
-- Android Debug Bridge (ADB)
-- scrcpy
+| Technology | Purpose |
+|---|---|
+| Electron | Windows desktop application |
+| React | User interface |
+| TypeScript | Application logic and type safety |
+| Vite | Development server and frontend tooling |
+| ADB | Android device communication |
+| scrcpy | Screen mirroring and device interaction |
+| Lucide React | Interface icons |
+| OpenAI SDK | Optional AI-related functionality |
+
+---
 
 ## Requirements
 
-- Windows 10 or Windows 11
-- Node.js and npm
-- An Android phone with Developer options and USB debugging enabled
-- A USB cable for initial connection, or a configured wireless ADB connection
-- The compatible Windows scrcpy distribution and its required files
+Before running PhoneDock, make sure you have:
+
+- Windows 10 or Windows 11.
+- Node.js and npm installed.
+- An Android phone with Developer options enabled.
+- A USB data cable for initial USB setup.
+- A compatible Windows scrcpy distribution.
+- USB debugging authorization on your phone.
+- Additional USB debugging security permissions if required by your device manufacturer.
+
+Some Android manufacturers require extra security settings before allowing remote input. The exact setting names and behavior vary by device and Android version.
+
+---
 
 ## Getting Started
 
 ### 1. Clone the repository
 
+Open PowerShell or the VS Code terminal:
+
 ```powershell
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/Space-bunny18/PhoneDock.git
 cd PhoneDock
 ```
 
-Replace `YOUR_GITHUB_REPOSITORY_URL` with the repository URL.
+### 2. Download scrcpy
 
-### 2. Obtain scrcpy
+PhoneDock uses scrcpy and ADB, which are not bundled in this repository.
 
-Download a compatible Windows release from the official scrcpy repository:
+Download the official Windows distribution from:
 
-https://github.com/Genymobile/scrcpy
+**https://github.com/Genymobile/scrcpy**
 
-Extract the distribution so the executable files are available at:
+Choose a compatible release, extract it, and place the required files in the following location:
 
 ```text
 PhoneDock/
+├── android-bridge/
+├── app/
+│   ├── electron/
+│   ├── src/
+│   ├── package.json
+│   └── README.md
 ├── engine/
 │   └── scrcpy-win64-v4.1/
 │       ├── adb.exe
 │       ├── scrcpy.exe
 │       ├── scrcpy-server
-│       └── required supporting files
-└── app/
+│       └── supporting DLLs and files
+├── .gitignore
+└── README.md
 ```
 
-The engine binaries are not included in this repository. Use a compatible distribution and follow its license terms.
+**Important:** The engine directory must match the path expected by PhoneDock's Electron main process. The example above uses `scrcpy-win64-v4.1`; if you use another release, update the directory name or the application's engine path configuration accordingly.
 
-### 3. Install dependencies
+Keep all required files from the downloaded distribution together. Do not copy only `scrcpy.exe` and `adb.exe` while omitting required server files or DLLs.
+
+Review the scrcpy license and the licenses of bundled dependencies before redistributing them.
+
+### 3. Install application dependencies
+
+From the project root:
 
 ```powershell
 cd app
 npm install
 ```
 
-### 4. Connect your Android phone
+### 4. Enable Android Developer options
 
-1. Enable Developer options on your phone.
-2. Enable USB debugging.
-3. Enable any additional USB debugging security permission required by your device.
-4. Connect the phone and authorize the debugging prompt.
-5. Unlock the phone.
+On your phone:
 
-Verify the connection from the project root:
+1. Open **Settings → About phone**.
+2. Locate the OS version or build number entry appropriate to your device.
+3. Tap it repeatedly until Developer options are enabled. Some manufacturers require a device PIN.
+4. Return to Settings and open **Developer options**.
+
+The exact navigation differs between Android manufacturers.
+
+### 5. Enable USB debugging
+
+Inside Developer options:
+
+1. Enable **USB debugging**.
+2. If your manufacturer provides an additional setting such as **USB debugging (Security settings)**, enable it if remote input requires it.
+3. Connect your phone to your PC using a USB data cable.
+4. Unlock your phone.
+5. Accept the **Allow USB debugging?** authorization prompt. Only authorize computers you trust.
+
+Some devices require a restart after enabling their additional USB debugging security setting.
+
+### 6. Verify the connection
+
+Open a second PowerShell terminal at the PhoneDock project root:
 
 ```powershell
 .\engine\scrcpy-win64-v4.1\adb.exe devices -l
 ```
 
-Your device should appear with the status `device`.
+Look for your phone in the output.
 
-### 5. Start PhoneDock
+A device listed with the status `device` is authorized and available to ADB. If it shows `unauthorized`, unlock your phone and accept the authorization prompt.
 
-From the `app` directory:
+### 7. Start PhoneDock
+
+In the terminal where you installed dependencies, remain inside the `app` directory and run:
 
 ```powershell
 npm run dev
 ```
 
-Keep the engine directory at the expected location relative to the project root.
+Vite starts the development environment, and the Electron/Vite configuration should launch the desktop application.
 
-## Troubleshooting
+Keep the terminal running while using the development build. Stop the development process with `Ctrl+C` when you're finished.
 
-### Phone not detected
+---
 
-- Confirm USB debugging is enabled.
-- Accept the authorization prompt on the phone.
-- Try another USB cable or USB port.
-- Check the output of `adb devices -l`.
+## How to Use PhoneDock
 
-### Mirroring works but input control fails
+### 1. Connect your phone
 
-- Check the additional USB debugging security setting on your device.
-- Reboot the phone after enabling that setting.
-- Test scrcpy independently to determine whether the problem is device-related or application-related.
+Launch PhoneDock and connect your Android device using USB or your configured wireless ADB connection.
 
-### Engine files cannot be found
+Wait for the device to be detected and its connection status to update. If several devices are connected, select the device you want to control when the device-selection interface is available.
 
-Ensure the engine directory is named and located correctly:
+### 2. Open the phone mirror
 
-`PhoneDock/engine/scrcpy-win64-v4.1/`
+Start the mirroring session from the PhoneDock interface.
 
-The required ADB, scrcpy, server, and supporting files must be present.
+Once the phone screen appears inside the workspace, you can interact with it from your PC.
 
-## Project Status
+### 3. Control your phone with your mouse
 
-PhoneDock is an experimental project under active development. Features, compatibility, and setup instructions may change.
+Click inside the mirrored phone screen to interact with apps, navigate menus, and select buttons.
 
-## License
+For the best results:
 
-The PhoneDock source code's license will be specified separately. scrcpy and its bundled dependencies remain subject to their respective licenses.
+- Keep the phone awake and unlocked while establishing the connection.
+- Click inside the mirror rather than outside its boundaries.
+- Wait for the mirror to finish loading before interacting.
+- Check the phone's security settings if the screen mirrors but clicks do not work.
+
+Some protected screens, secure applications, and manufacturer-specific interfaces may restrict interaction.
+
+### 4. Type using your keyboard
+
+Click a text field inside the mirrored phone, such as a search box or message field
